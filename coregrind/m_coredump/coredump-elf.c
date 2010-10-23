@@ -7,7 +7,7 @@
    This file is part of Valgrind, a dynamic binary instrumentation
    framework.
 
-   Copyright (C) 2000-2009 Julian Seward 
+   Copyright (C) 2000-2010 Julian Seward 
       jseward@acm.org
 
    This program is free software; you can redistribute it and/or
@@ -337,7 +337,6 @@ static void fill_prstatus(const ThreadState *tst,
    regs->rflags = LibVEX_GuestAMD64_get_rflags( &((ThreadArchState*)arch)->vex );
    regs->rsp    = arch->vex.guest_RSP;
    regs->rip    = arch->vex.guest_RIP;
-
    regs->rbx    = arch->vex.guest_RBX;
    regs->rcx    = arch->vex.guest_RCX;
    regs->rdx    = arch->vex.guest_RDX;
@@ -373,6 +372,25 @@ static void fill_prstatus(const ThreadState *tst,
    regs->es     = arch->vex.guest_ES;
    regs->fs     = arch->vex.guest_FS;
    regs->gs     = arch->vex.guest_GS;
+
+#elif defined(VGP_arm_linux)
+   regs->ARM_r0   = arch->vex.guest_R0;
+   regs->ARM_r1   = arch->vex.guest_R1;
+   regs->ARM_r2   = arch->vex.guest_R2;
+   regs->ARM_r3   = arch->vex.guest_R3;
+   regs->ARM_r4   = arch->vex.guest_R4;
+   regs->ARM_r5   = arch->vex.guest_R5;
+   regs->ARM_r6   = arch->vex.guest_R6;
+   regs->ARM_r7   = arch->vex.guest_R7;
+   regs->ARM_r8   = arch->vex.guest_R8;
+   regs->ARM_r9   = arch->vex.guest_R9;
+   regs->ARM_r10  = arch->vex.guest_R10;
+   regs->ARM_fp   = arch->vex.guest_R11;
+   regs->ARM_ip   = arch->vex.guest_R12;
+   regs->ARM_sp   = arch->vex.guest_R13;
+   regs->ARM_lr   = arch->vex.guest_R14;
+   regs->ARM_pc   = arch->vex.guest_R15T;
+   regs->ARM_cpsr = LibVEX_GuestARM_get_cpsr( &((ThreadArchState*)arch)->vex );
 
 #else
 #  error Unknown ELF platform
@@ -444,13 +462,15 @@ static void fill_fpu(const ThreadState *tst, vki_elf_fpregset_t *fpu)
 #  undef DO
 
 #elif defined(VGP_x86_freebsd)
-
 #elif defined(VGP_amd64_freebsd)
 
 #  define DO(n)  VG_(memcpy)(fpu->xmm_space + n * 4, &arch->vex.guest_XMM##n, sizeof(arch->vex.guest_XMM##n))
    DO(0);  DO(1);  DO(2);  DO(3);  DO(4);  DO(5);  DO(6);  DO(7);
    DO(8);  DO(9);  DO(10); DO(11); DO(12); DO(13); DO(14); DO(15);
 #  undef DO
+
+#elif defined(VGP_arm_linux)
+   // umm ...
 
 #else
 #  error Unknown ELF platform

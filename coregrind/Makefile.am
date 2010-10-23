@@ -10,12 +10,12 @@ include $(top_srcdir)/Makefile.all.am
 #----------------------------------------------------------------------------
 
 AM_CPPFLAGS_@VGCONF_PLATFORM_PRI_CAPS@ += \
- 	-I$(top_srcdir)/coregrind \
+	-I$(top_srcdir)/coregrind \
 	-DVG_LIBDIR="\"$(pkglibdir)"\" \
 	-DVG_PLATFORM="\"@VGCONF_ARCH_PRI@-@VGCONF_OS@\""
 if VGCONF_HAVE_PLATFORM_SEC
 AM_CPPFLAGS_@VGCONF_PLATFORM_SEC_CAPS@ += \
- 	-I$(top_srcdir)/coregrind \
+	-I$(top_srcdir)/coregrind \
 	-DVG_LIBDIR="\"$(pkglibdir)"\" \
 	-DVG_PLATFORM="\"@VGCONF_ARCH_SEC@-@VGCONF_OS@\""
 endif
@@ -59,12 +59,18 @@ valgrind_CPPFLAGS  = $(AM_CPPFLAGS_PRI)
 valgrind_CFLAGS    = $(AM_CFLAGS_PRI)
 valgrind_CCASFLAGS = $(AM_CCASFLAGS_PRI) $(AM_CPPFLAGS_PRI)
 valgrind_LDFLAGS   = $(AM_CFLAGS_PRI)
+if VGCONF_PLATFORMS_INCLUDE_X86_DARWIN
+valgrind_LDFLAGS   += -Wl,-read_only_relocs -Wl,suppress
+endif
 
 no_op_client_for_valgrind_SOURCES = no_op_client_for_valgrind.c
 no_op_client_for_valgrind_CPPFLAGS  = $(AM_CPPFLAGS_PRI)
 no_op_client_for_valgrind_CFLAGS    = $(AM_CFLAGS_PRI)
 no_op_client_for_valgrind_CCASFLAGS = $(AM_CCASFLAGS_PRI)
 no_op_client_for_valgrind_LDFLAGS   = $(AM_CFLAGS_PRI)
+if VGCONF_PLATFORMS_INCLUDE_X86_DARWIN
+no_op_client_for_valgrind_LDFLAGS   += -Wl,-read_only_relocs -Wl,suppress
+endif
 
 #----------------------------------------------------------------------------
 # Darwin Mach stuff
@@ -114,11 +120,13 @@ mach_defs += \
         /usr/include/mach/vm_map.defs
 endif
 
-# Be careful w.r.t. parellel builds.  See section 27.9 of the automake info
+# Be careful w.r.t. parallel builds.  See section 27.9 of the automake info
 # page, "Handling Tools that Produce many Outputs".
-$(mach_user_srcs): $(mach_defs)
+$(abs_builddir)/m_mach: 
+	mkdir -p $@
+$(mach_user_srcs): $(mach_defs) $(abs_builddir)/m_mach
 	(cd m_mach && mig $(mach_defs))
-$(mach_hdrs): $(mach_defs) $(mach_user_srcs)
+$(mach_hdrs): $(mach_defs) $(mach_user_srcs) $(abs_builddir)/m_mach
 	(cd m_mach && mig $(mach_defs))
 
 #----------------------------------------------------------------------------
@@ -288,6 +296,7 @@ COREGRIND_SOURCES_COMMON = \
 	m_dispatch/dispatch-ppc64-linux.S \
 	m_dispatch/dispatch-x86-freebsd.S \
 	m_dispatch/dispatch-amd64-freebsd.S \
+	m_dispatch/dispatch-arm-linux.S \
 	m_dispatch/dispatch-ppc32-aix5.S \
 	m_dispatch/dispatch-ppc64-aix5.S \
 	m_dispatch/dispatch-x86-darwin.S \
@@ -310,18 +319,18 @@ COREGRIND_SOURCES_COMMON = \
 	m_sigframe/sigframe-amd64-freebsd.c \
 	m_sigframe/sigframe-ppc32-linux.c \
 	m_sigframe/sigframe-ppc64-linux.c \
+	m_sigframe/sigframe-arm-linux.c \
 	m_sigframe/sigframe-ppc32-aix5.c \
 	m_sigframe/sigframe-ppc64-aix5.c \
 	m_sigframe/sigframe-x86-darwin.c \
 	m_sigframe/sigframe-amd64-darwin.c \
-	m_start-x86-darwin.S \
-	m_start-amd64-darwin.S \
 	m_syswrap/syscall-x86-linux.S \
 	m_syswrap/syscall-amd64-linux.S \
 	m_syswrap/syscall-ppc32-linux.S \
 	m_syswrap/syscall-ppc64-linux.S \
 	m_syswrap/syscall-x86-freebsd.S \
 	m_syswrap/syscall-amd64-freebsd.S \
+	m_syswrap/syscall-arm-linux.S \
 	m_syswrap/syscall-ppc32-aix5.S \
 	m_syswrap/syscall-ppc64-aix5.S \
 	m_syswrap/syscall-x86-darwin.S \
@@ -340,6 +349,7 @@ COREGRIND_SOURCES_COMMON = \
 	m_syswrap/syswrap-ppc64-linux.c \
 	m_syswrap/syswrap-x86-freebsd.c \
 	m_syswrap/syswrap-amd64-freebsd.c \
+	m_syswrap/syswrap-arm-linux.c \
 	m_syswrap/syswrap-ppc32-aix5.c \
 	m_syswrap/syswrap-ppc64-aix5.c \
 	m_syswrap/syswrap-x86-darwin.c \
