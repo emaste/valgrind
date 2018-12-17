@@ -1142,6 +1142,7 @@ PRE(sys_sysarch)
 	 POST_MEM_WRITE( ARG2, sizeof(void *) );
       }
       break;
+#if 0
    case VKI_I386_GET_XFPUSTATE:
       PRINT("sys_i386_get_xfpustate ( %#lx )", ARG2);
       PRE_REG_READ1(int, "i386_get_xfpustate", void *, basep)
@@ -1152,6 +1153,7 @@ PRE(sys_sysarch)
       SET_STATUS_Success2( tst->arch.vex.guest_FPTAG[0], tst->arch.vex.guest_FPTAG[0] );
       POST_MEM_WRITE( ARG2, sizeof(void *) );
       break;
+#endif
    default:
       VG_(message) (Vg_UserMsg, "unhandled sysarch cmd %ld", ARG1);
       VG_(unimplemented) ("unhandled sysarch cmd");
