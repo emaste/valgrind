@@ -224,7 +224,7 @@ case "${host_cpu}" in
         ARCH_MAX="x86"
         ;;
 
-     x86_64|amd64) 
+     x86_64|amd64)
         AC_MSG_RESULT([ok (${host_cpu})])
         ARCH_MAX="amd64"
         ;;
