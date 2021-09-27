@@ -15,5 +15,5 @@ task:
     - gmake -j $(sysctl -n hw.ncpu)
 
   test_script:
-    - gmake regtest
+    - gmake check
 
